@@ -10,7 +10,7 @@ double isHitSphere(const Point3& sphereCenter, double sphereRadius, const Ray& i
     auto h = performDot(inputRay.getDirection(), cq);
     auto c = performDot(cq, cq) - sphereRadius * sphereRadius;
     auto determinant = h * h - a * c;
-    if (determinant >= 0)
+    if (determinant < 0)
         return -1;
     else
         return (h -sqrt(determinant)) / a;
@@ -18,8 +18,11 @@ double isHitSphere(const Point3& sphereCenter, double sphereRadius, const Ray& i
 
 
 Color getRayColor(const Ray& inputRay) {
-    if (isHitSphere(Point3(0, 0, -1), 0.5, inputRay))
-        return Color(0, 1, 0);
+    auto hitInformation = isHitSphere(Point3(0, 0, -1), 0.5, inputRay);
+    if (hitInformation > 0) {
+        Vec3 normalizedVector = getUnitVector(inputRay.getPosition(hitInformation) - Vec3(0, 0, -1));
+        return 0.5 * Color(normalizedVector.getX() + 1, normalizedVector.getY() + 1, normalizedVector.getZ() + 1);
+    }
 
     Vec3 unitDirection = getUnitVector(inputRay.getDirection());
     auto a = 0.5 * (unitDirection.getY() + 1.0);
