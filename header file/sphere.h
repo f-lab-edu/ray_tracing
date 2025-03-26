@@ -8,7 +8,7 @@ class Sphere : public Hittable {
 public:
     Sphere(const Point3& center, double radius) : center(center), radius(std::fmax(0, radius)) {}
 
-    bool hit(const Ray& inputRay, double rayMin, double rayMax, HitRecord& record) const override {
+    bool isHit(const Ray& inputRay, double rayMin, double rayMax, HitRecord& record) const override {
         Vec3 oc = center - inputRay.getOrigin();
         auto a = inputRay.getDirection().getLengthSquared();
         auto h = performDot(inputRay.getDirection(), oc);
