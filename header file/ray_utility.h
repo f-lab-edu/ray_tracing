@@ -17,8 +17,8 @@ inline double convertDegreesToRadians(double degrees) {
 }
 
 // Common Headers
+#include "vec3.h"
 #include "color.h"
 #include "ray.h"
-#include "vec3.h"
 
 #endif
