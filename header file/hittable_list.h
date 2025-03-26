@@ -1,9 +1,9 @@
 #ifndef Hittable_LIST_H
 #define Hittable_LIST_H
 
+#include "ray_utility.h"
 #include "Hittable.h"
 
-#include <memory>
 #include <vector>
 
 class HittableList : public Hittable {
