@@ -4,13 +4,16 @@
 
 #include <iostream>
 
-bool isHitSphere(const Point3& sphereCenter, double sphereRadius, const Ray& inputRay) {
+double isHitSphere(const Point3& sphereCenter, double sphereRadius, const Ray& inputRay) {
     Vec3 cq = sphereCenter - inputRay.getOrigin();      // C - Q
     auto a = performDot(inputRay.getDirection(), inputRay.getDirection());
-    auto b = -2.0 * performDot(inputRay.getDirection(), cq);
+    auto h = performDot(inputRay.getDirection(), cq);
     auto c = performDot(cq, cq) - sphereRadius * sphereRadius;
-    auto determinant = b * b - 4 * a * c;
-    return determinant >= 0;
+    auto determinant = h * h - a * c;
+    if (determinant >= 0)
+        return -1;
+    else
+        return (h -sqrt(determinant)) / a;
 }
 
 
