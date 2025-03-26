@@ -18,6 +18,7 @@ inline double convertDegreesToRadians(double degrees) {
 
 // Common Headers
 #include "vec3.h"
+#include "interval.h"
 #include "color.h"
 #include "ray.h"
 
