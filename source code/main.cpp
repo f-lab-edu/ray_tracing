@@ -18,7 +18,7 @@ double isHitSphere(const Point3& sphereCenter, double sphereRadius, const Ray& i
 
 Color getRayColor(const Ray &inputRay, const Hittable &world) {
     HitRecord record;
-    if (world.isHit(inputRay, 0, RT_INFINITY, record)) {
+    if (world.isHit(inputRay, Interval(0, RT_INFINITY), record)) {
         return 0.5 * (record.normalizedVector + Color(1,1,1));
     }
 
