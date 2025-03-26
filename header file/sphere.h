@@ -8,7 +8,7 @@ class Sphere : public Hittable {
 public:
     Sphere(const Point3& center, double radius) : center(center), radius(std::fmax(0, radius)) {}
 
-    bool isHit(const Ray& inputRay, double rayMin, double rayMax, HitRecord& record) const override {
+    bool isHit(const Ray& inputRay, Interval rayInterval, HitRecord& record) const override {
         Vec3 oc = center - inputRay.getOrigin();
         auto a = inputRay.getDirection().getLengthSquared();
         auto h = performDot(inputRay.getDirection(), oc);
@@ -22,9 +22,9 @@ public:
 
         // Find the nearest root that lies in the acceptable range.
         auto root = (h - sqrtd) / a;
-        if (root <= rayMin || rayMax <= root) {
+        if (root <= rayInterval.min || rayInterval.max <= root) {
             root = (h + sqrtd) / a;
-            if (root <= rayMin || rayMax <= root)
+            if (root <= rayInterval.min || rayInterval.max <= root)
                 return false;
         }
 
