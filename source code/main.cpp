@@ -1,8 +1,7 @@
-#include "color.h"
-#include "ray.h"
-#include "vec3.h"
-
-#include <iostream>
+#include "ray_utility.h"
+#include "hittable.h"
+#include "hittable_list.h"
+#include "sphere.h"
 
 double isHitSphere(const Point3& sphereCenter, double sphereRadius, const Ray& inputRay) {
     Vec3 cq = sphereCenter - inputRay.getOrigin();      // C - Q
@@ -17,16 +16,15 @@ double isHitSphere(const Point3& sphereCenter, double sphereRadius, const Ray& i
 }
 
 
-Color getRayColor(const Ray& inputRay) {
-    auto hitInformation = isHitSphere(Point3(0, 0, -1), 0.5, inputRay);
-    if (hitInformation > 0) {
-        Vec3 normalizedVector = getUnitVector(inputRay.getPosition(hitInformation) - Vec3(0, 0, -1));
-        return 0.5 * Color(normalizedVector.getX() + 1, normalizedVector.getY() + 1, normalizedVector.getZ() + 1);
+Color getRayColor(const Ray &inputRay, const Hittable &world) {
+    HitRecord record;
+    if (world.isHit(inputRay, 0, RT_INFINITY, record)) {
+        return 0.5 * (record.normalizedVector + Color(1,1,1));
     }
 
     Vec3 unitDirection = getUnitVector(inputRay.getDirection());
-    auto a = 0.5 * (unitDirection.getY() + 1.0);
-    return (1.0 - a) * Color(1.0, 1.0, 1.0) + a * Color(0.5, 0.7, 1.0);
+    auto lerp = 0.5 * (unitDirection.getY() + 1.0);
+    return (1.0 - lerp) * Color(1.0, 1.0, 1.0) + lerp * Color(0.5, 0.7, 1.0);
 }
 
 int main() {
@@ -34,6 +32,10 @@ int main() {
     int imageWidth = 400;
     int imageHeight = static_cast<int>(imageWidth / aspectRatio);
     imageHeight = (imageHeight < 1) ? 1 : imageHeight;
+
+    HittableList world;
+    world.add(std::make_shared<Sphere>(Point3(0, 0, -1), 0.5));
+    world.add(std::make_shared<Sphere>(Point3(0, -50, -10), 50));
 
     auto focalLength = 1.0, viewportHeight = 2.0;
     auto viewportWidth = viewportHeight * (static_cast<double>(imageWidth) / imageHeight);
@@ -54,7 +56,7 @@ int main() {
             auto rayDirection = currentPixelCenter - cameraCenter;
             Ray currentRay(cameraCenter, rayDirection);
 
-            Color pixelColor = getRayColor(currentRay);
+            Color pixelColor = getRayColor(currentRay, world);
             writeColor(std::cout, pixelColor);
         }
     }
