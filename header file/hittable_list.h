@@ -19,13 +19,13 @@ public:
         objects.push_back(object);
     }
 
-    bool isHit(const Ray& r, double rayMin, double rayMax, HitRecord& record) const override {
+    bool isHit(const Ray& r, Interval rayInteraval, HitRecord& record) const override {
         HitRecord tempRecord;
         bool isHitAnything = false;
-        auto closestSoFar = rayMax;
+        auto closestSoFar = rayInteraval.max;
 
         for (const auto& object : objects) {
-            if (object->isHit(r, rayMin, closestSoFar, tempRecord)) {
+            if (object->isHit(r, Interval(rayInteraval.min, closestSoFar), tempRecord)) {
                 isHitAnything = true;
                 if (tempRecord.root < closestSoFar) {
                     closestSoFar = tempRecord.root;
