@@ -8,6 +8,7 @@ public:
     double aspectRatio = 1.0;           // Ratio of image width over height
     int    imageWidth = 100;            // Rendered image width in pixel count
     int    samplesPerPixel = 10;        // Count of random sampels for each pixel
+    int    maxDepth = 10;
 
     void render(const Hittable &world) {
         initialize();
@@ -20,7 +21,7 @@ public:
                 Color pixelColor(0, 0, 0);
                 for (int currentSample = 0; currentSample < samplesPerPixel; ++currentSample) {
                     Ray currentRay = getRayToSample(currentWidth, currentHeight);
-                    pixelColor += getRayColor(currentRay, world);
+                    pixelColor += getRayColor(currentRay, maxDepth, world);
                 }
                 writeColor(std::cout, pixelSamplesScale * pixelColor);
             }
@@ -76,12 +77,15 @@ private:
     }
 
 
-    Color getRayColor(const Ray &inputRay, const Hittable &world) const {
+    Color getRayColor(const Ray &inputRay, int depth, const Hittable &world) const {
+        if (depth <= 0)
+            return Color(0, 0, 0);
+
         HitRecord record;
 
-        if (world.isHit(inputRay, Interval(0, RT_INFINITY), record)) {
+        if (world.isHit(inputRay, Interval(0.001, RT_INFINITY), record)) {
             Vec3 direction = getRandomOnHemisphere(record.normalizedVector);
-            return 0.5 * getRayColor(Ray(record.hitPosition, direction), world);
+            return 0.5 * getRayColor(Ray(record.hitPosition, direction), depth - 1, world);
         }
 
         Vec3 unitDirection = getUnitVector(inputRay.getDirection());
