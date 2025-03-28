@@ -2,6 +2,7 @@
 #define RAYUTILITY_H
 
 #include <cmath>
+#include <random>
 #include <iostream>
 #include <limits>
 #include <memory>
@@ -14,6 +15,13 @@ constexpr double PI = 3.1415926535897932385;
 // Utility Functions
 inline double convertDegreesToRadians(double degrees) {
     return degrees * PI / 180.0;
+}
+
+
+inline double getRandomDouble() {
+    static std::uniform_real_distribution<double> distribution(0.0, 1.0);
+    static std::mt19937 generator;
+    return distribution(generator);
 }
 
 // Common Headers
