@@ -79,8 +79,10 @@ private:
     Color getRayColor(const Ray &inputRay, const Hittable &world) const {
         HitRecord record;
 
-        if (world.isHit(inputRay, Interval(0, RT_INFINITY), record))
-            return 0.5 * (record.normalizedVector + Color(1, 1, 1));
+        if (world.isHit(inputRay, Interval(0, RT_INFINITY), record)) {
+            Vec3 direction = getRandomOnHemisphere(record.normalizedVector);
+            return 0.5 * getRayColor(Ray(record.hitPosition, direction), world);
+        }
 
         Vec3 unitDirection = getUnitVector(inputRay.getDirection());
         auto lerp = 0.5 * (unitDirection.getY() + 1.0);
