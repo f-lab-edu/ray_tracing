@@ -43,6 +43,10 @@ public:
     double getLengthSquared() const {
         return e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
     }
+
+    static Vec3 getRandomVector(double min, double max) {
+        return Vec3(getRandomDouble(min, max), getRandomDouble(min, max), getRandomDouble(min, max));
+    }
 };
 
 // point3 is just an alias for Vec3, but useful for geometric clarity in the code.
@@ -93,6 +97,23 @@ inline Vec3 performCross(const Vec3& u, const Vec3& v) {
 
 inline Vec3 getUnitVector(const Vec3& v) {
     return v / v.getLength();
+}
+
+inline Vec3 getRandomUnitVector() {
+    while (true) {
+        auto p = Vec3::getRandomVector(-1, 1);
+        auto lengthSquared = p.getLengthSquared();
+        if (1e-160 < lengthSquared && lengthSquared <= 1)       // enable blockhole
+            return p / sqrt(lengthSquared);
+    }
+}
+
+inline Vec3 getRandomOnHemisphere(const Vec3& normal) {
+    Vec3 onUnitSphere = getRandomUnitVector();
+    if (performDot(onUnitSphere, normal) > 0.0) // In the same hemisphere as the normal
+        return onUnitSphere;
+    else
+        return -onUnitSphere;
 }
 
 #endif
