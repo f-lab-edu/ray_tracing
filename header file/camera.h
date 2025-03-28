@@ -3,7 +3,7 @@
 
 #include "hittable.h"
 
-class camera {
+class Camera {
 public:
     double aspectRatio = 1.0;  // Ratio of image width over height
     int    imageWidth = 100;  // Rendered image width in pixel count
