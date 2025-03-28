@@ -72,7 +72,7 @@ private:
 
     Vec3 getSampleSquare() const {
         // Returns the vector to a random point in the [-.5,-.5]-[+.5,+.5] unit square.
-        return Vec3(getRandomDouble() - 0.5, getRandomDouble() - 0.5, 0);
+        return Vec3(getRandomDouble(0, 1) - 0.5, getRandomDouble(0, 1) - 0.5, 0);
     }
 
 
