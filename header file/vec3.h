@@ -122,4 +122,8 @@ inline Vec3 getRandomOnHemisphere(const Vec3& normal) {
         return -onUnitSphere;
 }
 
+inline Vec3 getReflectedMirror(const Vec3& inputVector, const Vec3 &unitVector) {
+    return inputVector - 2 * performDot(inputVector, unitVector) * unitVector;
+}
+
 #endif
