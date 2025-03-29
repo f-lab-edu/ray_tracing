@@ -65,9 +65,17 @@ public:
         double finalRefractionIndex = record.frontFace ? (1.0 / refractionIndex) : refractionIndex;
 
         Vec3 normalizedInputVector = getUnitVector(inputRay.getDirection());
-        Vec3 refractedVector = getRefracted(normalizedInputVector, record.normalizedVector, finalRefractionIndex);
+        double cosTheta = std::fmin(performDot(-normalizedInputVector, record.normalizedVector), 1.0);
+        double sinTheta = std::sqrt(1.0 - cosTheta * cosTheta);
 
-        scatteredRay = Ray(record.hitPosition, refractedVector);
+        bool canRefracted = finalRefractionIndex * sinTheta > 1.0;
+        Vec3 finalRay;      // this can be made from reflection or refraction
+        if (canRefracted)
+            finalRay = getReflectedMirror(normalizedInputVector, record.normalizedVector);
+        else
+            finalRay = getRefracted(normalizedInputVector, record.normalizedVector, finalRefractionIndex);
+
+        scatteredRay = Ray(record.hitPosition, finalRay);
         return true;
     }
 
