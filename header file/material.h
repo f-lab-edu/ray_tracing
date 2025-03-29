@@ -55,4 +55,26 @@ private:
     double fuzz;
 };
 
+
+class Dielectric : public Material {
+public:
+    Dielectric(double inputRefractionIndex) : refractionIndex(inputRefractionIndex) {}
+
+    bool doesScatter(const Ray &inputRay, const HitRecord &record, Color &attenuation, Ray &scatteredRay) const override {
+        attenuation = Color(1.0, 1.0, 1.0);
+        double finalRefractionIndex = record.frontFace ? (1.0 / refractionIndex) : refractionIndex;
+
+        Vec3 normalizedInputVector = getUnitVector(inputRay.getDirection());
+        Vec3 refractedVector = getRefracted(normalizedInputVector, record.normalizedVector, finalRefractionIndex);
+
+        scatteredRay = Ray(record.hitPosition, refractedVector);
+        return true;
+    }
+
+private:
+    // Refractive index in vacuum or air, or the ratio of the material's refractive index over
+    // the refractive index of the enclosing media
+    double refractionIndex;
+};
+
 #endif
