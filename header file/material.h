@@ -17,8 +17,13 @@ public:
     Lambertian(const Color& inputAlbedo) : albedo(inputAlbedo) {}
 
     bool doesScatter(const Ray &inputRay, const HitRecord &record, Color &attenuation, Ray &scatteredRay) const override {
-        auto scatterDirection = record.normalizedVector + getRandomUnitVector();
-        scatteredRay = Ray(record.hitPosition, scatterDirection);
+        auto scatteredVector = record.normalizedVector + getRandomUnitVector();
+
+        // handling invalid scattering
+        if (scatteredVector.isNearZero())
+            scatteredVector = record.normalizedVector;
+
+        scatteredRay = Ray(record.hitPosition, scatteredVector);
         attenuation = albedo;
         return true;
     }
