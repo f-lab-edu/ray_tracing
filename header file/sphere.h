@@ -32,6 +32,7 @@ public:
         record.hitPosition = inputRay.getPosition(record.root);
         Vec3 outwardNormal = (record.hitPosition - center) / radius;
         record.setFaceNormal(inputRay, outwardNormal);
+        record.material = material;
 
         return true;
     }
