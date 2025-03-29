@@ -122,8 +122,17 @@ inline Vec3 getRandomOnHemisphere(const Vec3& normal) {
         return -onUnitSphere;
 }
 
-inline Vec3 getReflectedMirror(const Vec3& inputVector, const Vec3 &unitVector) {
-    return inputVector - 2 * performDot(inputVector, unitVector) * unitVector;
+inline Vec3 getReflectedMirror(const Vec3& inputVector, const Vec3 &normalVector) {
+    // this assumes that normal vector is unit vector
+    return inputVector - 2 * performDot(inputVector, normalVector) * normalVector;
+}
+
+inline Vec3 getRefracted(const Vec3 &inputVector, const Vec3 &normalVector, double etaiOverEtatPrime) {
+    // this function assumes that inputVector and normal vector are unit vectors
+    auto cosTheta = std::fmin(performDot(-inputVector, normalVector), 1.0);
+    Vec3 rayPerpendicular = etaiOverEtatPrime * (inputVector + cosTheta * normalVector);
+    Vec3 rayParallel = -std::sqrt(std::fabs(1.0 - rayPerpendicular.getLengthSquared())) * normalVector;
+    return rayPerpendicular + rayParallel;
 }
 
 #endif
