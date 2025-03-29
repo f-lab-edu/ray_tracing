@@ -2,6 +2,7 @@
 #define CAMERA_H
 
 #include "hittable.h"
+#include "material.h"
 
 class Camera {
 public:
@@ -84,9 +85,11 @@ private:
         HitRecord record;
 
         if (world.isHit(inputRay, Interval(0.001, RT_INFINITY), record)) {
-            //Vec3 direction = getRandomOnHemisphere(record.normalizedVector);      // get random vector with uniform distribution
-            Vec3 direction = record.normalizedVector + getRandomUnitVector();       // get random vector with lambertian distribution
-            return 0.3 * getRayColor(Ray(record.hitPosition, direction), depth - 1, world); // set the reflectance scale
+            Ray scatteredRay;
+            Color attenuation;
+            if (record.material->doesScatter(inputRay, record, attenuation, scatteredRay))
+                return attenuation * getRayColor(scatteredRay, depth - 1, world);
+            return Color(0, 0, 0);
         }
 
         Vec3 unitDirection = getUnitVector(inputRay.getDirection());
