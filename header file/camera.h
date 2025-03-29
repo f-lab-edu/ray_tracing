@@ -84,7 +84,8 @@ private:
         HitRecord record;
 
         if (world.isHit(inputRay, Interval(0.001, RT_INFINITY), record)) {
-            Vec3 direction = getRandomOnHemisphere(record.normalizedVector);
+            //Vec3 direction = getRandomOnHemisphere(record.normalizedVector);      // get random vector with uniform distribution
+            Vec3 direction = record.normalizedVector + getRandomUnitVector();       // get random vector with lambertian distribution
             return 0.5 * getRayColor(Ray(record.hitPosition, direction), depth - 1, world);
         }
 
