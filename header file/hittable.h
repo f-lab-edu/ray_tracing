@@ -3,9 +3,12 @@
 
 #include "ray_utility.h"
 
+class Material;
+
 struct HitRecord {
     Point3 hitPosition;
     Vec3 normalizedVector;
+    std::shared_ptr<Material> material;
     double root;
     bool frontFace;
 
