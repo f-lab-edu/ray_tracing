@@ -24,11 +24,11 @@ int main() {
 
     auto radius = std::cos(PI / 4);
 
-    auto material_left = std::make_shared<Lambertian>(Color(0, 0, 1));
-    auto material_right = std::make_shared<Lambertian>(Color(1, 0, 0));
+    auto materialLeft = std::make_shared<Lambertian>(Color(0, 0, 1));
+    auto materialRight = std::make_shared<Lambertian>(Color(1, 0, 0));
 
-    world.add(std::make_shared<Sphere>(Point3(-radius, 0, -1), radius, material_left));
-    world.add(std::make_shared<Sphere>(Point3(radius, 0, -1), radius, material_right));
+    world.add(std::make_shared<Sphere>(Point3(-radius, 0, -1), radius, materialLeft));
+    world.add(std::make_shared<Sphere>(Point3(radius, 0, -1), radius, materialRight));
 
 
     Camera camera;
