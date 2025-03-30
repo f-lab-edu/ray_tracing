@@ -47,19 +47,19 @@ private:
         center = lookFrom;
 
         // Determine viewport dimensions.
-        auto focalLength = (lookAt - lookFrom).getLength();
+        auto focalLength = (lookFrom - lookAt).getLength();
         auto theta = convertDegreesToRadians(verticalFOV);
         auto h = std::tan(theta / 2) * focalLength;
         auto viewportHeight = 2 * h;
         auto viewportWidth = viewportHeight * (static_cast<double>(imageWidth) / imageHeight);
 
         // Calculate the x,y,z unit basis vectors for the camera coordinate frame.
-        // x = right, z = view direction, y = final up direction
-        axisZ = getUnitVector(lookAt - lookFrom);
-        auto pureUpVector = upVector - performDot(upVector, axisZ) * axisZ;
+        // x = right, z = opposite view direction, y = final up direction
+        axisZ = getUnitVector(lookFrom - lookAt);       // not from camera to target, but from target to camera because (0,0,1) should point in backward direction
+        auto pureUpVector = upVector - performDot(upVector, axisZ) * axisZ;     // make up vector always be perpendicular to axisZ
         pureUpVector = pureUpVector / pureUpVector.getLength();
-        axisX = getUnitVector(performCross(axisZ, pureUpVector));
-        axisY = performCross(axisX, axisZ);  
+        axisX = getUnitVector(performCross(pureUpVector, axisZ));
+        axisY = performCross(axisZ, axisX);
 
         // Calculate the vectors across the horizontal and down the vertical viewport edges.
         auto vectorViewportWidth = viewportWidth * axisX;
@@ -70,7 +70,7 @@ private:
         pixelDeltaHeight = vectorViewportHeight / imageHeight;
 
         // Calculate the location of the upper left pixel.
-        auto pointViewportTopLeft = focalLength * axisZ - center - vectorViewportWidth / 2 - vectorViewportHeight / 2;
+        auto pointViewportTopLeft = center - focalLength * axisZ - vectorViewportWidth / 2 - vectorViewportHeight / 2;
         pixelCenterTopLeft = pointViewportTopLeft + 0.5 * (pixelDeltaWidth + pixelDeltaHeight);
     }
 
