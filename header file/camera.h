@@ -16,6 +16,10 @@ public:
     Point3 lookAt = Point3(0, 0, -1);   // Point camera is looking at
     Vec3   upVector = Vec3(0, 1, 0);    // Camera-relative "up" direction;
 
+    double defocusAngle = 0;  // Variation angle of rays through each pixel; size of the aperture
+    double focusDistance = 10;    // Distance from camera lookfrom point to plane of perfect focus
+
+
 
     void render(const Hittable& world) {
         initialize();
@@ -47,9 +51,8 @@ private:
         center = lookFrom;
 
         // Determine viewport dimensions.
-        auto focalLength = (lookFrom - lookAt).getLength();
         auto theta = convertDegreesToRadians(verticalFOV);
-        auto h = std::tan(theta / 2) * focalLength;
+        auto h = std::tan(theta / 2) * focusDistance;      // use focus distance instead of focal length
         auto viewportHeight = 2 * h;
         auto viewportWidth = viewportHeight * (static_cast<double>(imageWidth) / imageHeight);
 
@@ -70,8 +73,13 @@ private:
         pixelDeltaHeight = vectorViewportHeight / imageHeight;
 
         // Calculate the location of the upper left pixel.
-        auto pointViewportTopLeft = center - focalLength * axisZ - vectorViewportWidth / 2 - vectorViewportHeight / 2;
+        auto pointViewportTopLeft = center - focusDistance * axisZ - vectorViewportWidth / 2 - vectorViewportHeight / 2;
         pixelCenterTopLeft = pointViewportTopLeft + 0.5 * (pixelDeltaWidth + pixelDeltaHeight);
+
+        // Calculate the camera defocus disk basis vectors.
+        auto defocusRadius = focusDistance * std::tan(convertDegreesToRadians(defocusAngle / 2));
+        defocusHorizontalRadius = axisX * defocusRadius;
+        defocusVerticalRadius = axisY * defocusRadius;
     }
 
     Ray getRayToSample(int currentWidth, int currentHeight) const {
@@ -83,9 +91,16 @@ private:
             + ((currentWidth + offset.getX()) * pixelDeltaWidth)
             + ((currentHeight + offset.getY()) * pixelDeltaHeight);
 
-        auto rayDirection = pixelSample - center;
+        auto rayOrigin = (defocusAngle <= 0) ? center : getDefocusRandomPoint();
+        auto rayDirection = pixelSample - rayOrigin;
 
-        return Ray(center, rayDirection);
+        return Ray(rayOrigin, rayDirection);
+    }
+
+    Point3 getDefocusRandomPoint() const {
+        // Returns a random point in the camera defocus disk.
+        auto p = getRandomInUnitDisk();
+        return center + (p[0] * defocusHorizontalRadius) + (p[1] * defocusVerticalRadius);
     }
 
     Vec3 getSampleSquare() const {
@@ -121,6 +136,9 @@ private:
     Vec3   pixelDeltaWidth;  // Offset to pixel to the right
     Vec3   pixelDeltaHeight;  // Offset to pixel below
     Vec3   axisX, axisY, axisZ; // camera frame basis vectors (u,v,w)
+
+    Vec3   defocusHorizontalRadius;       // Defocus disk horizontal radius
+    Vec3   defocusVerticalRadius;       // Defocus disk vertical radius
 };
 
 #endif
