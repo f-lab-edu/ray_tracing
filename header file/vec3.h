@@ -122,6 +122,14 @@ inline Vec3 getRandomOnHemisphere(const Vec3& normal) {
         return -onUnitSphere;
 }
 
+inline Vec3 getRandomInUnitDisk() {
+    while (true) {
+        auto p = Vec3(getRandomDouble(-1, 1), getRandomDouble(-1, 1), 0);
+        if (p.getLengthSquared() < 1)
+            return p;
+    }
+}
+
 inline Vec3 getReflectedMirror(const Vec3& inputVector, const Vec3 &normalVector) {
     // this assumes that normal vector is unit vector
     return inputVector - 2 * performDot(inputVector, normalVector) * normalVector;
