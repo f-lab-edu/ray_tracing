@@ -24,6 +24,11 @@ inline double getRandomDouble(double min, double max) {
     return distribution(generator);
 }
 
+inline double getRandomDouble() {
+    return getRandomDouble(0.0, 1.0);
+}
+
+
 // Common Headers
 #include "vec3.h"
 #include "interval.h"
