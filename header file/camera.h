@@ -9,7 +9,8 @@ public:
     double aspectRatio = 1.0;           // Ratio of image width over height
     int    imageWidth = 100;            // Rendered image width in pixel count
     int    samplesPerPixel = 10;        // Count of random sampels for each pixel
-    int    maxDepth = 10;
+    int    maxDepth = 10;               // Maximum number of ray bounces into scene
+    double verticalFOV = 90;            // vertical view angle
 
     void render(const Hittable &world) {
         initialize();
@@ -41,8 +42,10 @@ private:
         center = Point3(0, 0, 0);
 
         // Determine viewport dimensions.
-        auto focal_length = 1.0;
-        auto viewportHeight = 2.0;
+        auto focalLength = 1.0;
+        auto theta = convertDegreesToRadians(verticalFOV);
+        auto h = std::tan(theta / 2) * focalLength;
+        auto viewportHeight = 2 * h ;
         auto viewportWidth = viewportHeight * (static_cast<double>(imageWidth) / imageHeight);
 
         // Calculate the vectors across the horizontal and down the vertical viewport edges.
