@@ -57,7 +57,7 @@ private:
         pixelDeltaHeight = vectorViewportHeight / imageHeight;
 
         // Calculate the location of the upper left pixel.
-        auto pointViewportTopLeft = center - Vec3(0, 0, focal_length) - vectorViewportWidth / 2 - vectorViewportHeight / 2;
+        auto pointViewportTopLeft = center - Vec3(0, 0, focalLength) - vectorViewportWidth / 2 - vectorViewportHeight / 2;
         pixelCenterTopLeft = pointViewportTopLeft + 0.5 * (pixelDeltaWidth + pixelDeltaHeight);
     }
 
