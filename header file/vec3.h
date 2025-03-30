@@ -50,6 +50,10 @@ public:
         return (std::fabs(e[0]) < s) && (std::fabs(e[1]) < s) && (std::fabs(e[2]) < s);
     }
 
+    static Vec3 getRandomVector() {
+        return Vec3(getRandomDouble(), getRandomDouble(), getRandomDouble());
+    }
+
     static Vec3 getRandomVector(double min, double max) {
         return Vec3(getRandomDouble(min, max), getRandomDouble(min, max), getRandomDouble(min, max));
     }
