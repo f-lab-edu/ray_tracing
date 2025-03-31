@@ -17,6 +17,7 @@ public:
 
     void add(std::shared_ptr<Hittable> object) {
         objects.push_back(object);
+        boundingBox = AABB(boundingBox, object->getBoundingBox());
     }
 
     bool isHit(const Ray& r, Interval rayInteraval, HitRecord& record) const override {
@@ -36,6 +37,11 @@ public:
 
         return isHitAnything;
     }
+
+    AABB getBoundingBox() const override { return boundingBox; }
+
+private:
+    AABB boundingBox;
 };
 
 #endif
