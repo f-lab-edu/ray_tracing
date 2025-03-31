@@ -61,6 +61,21 @@ public:
         // if all axes are overlapped, then the ray is hit
         return true;
     }
+
+    int getLongestAxisIndex() const {
+        // Returns the index of the longest axis of the bounding box.
+
+        if (intervalX.getSize() > intervalY.getSize())
+            return intervalX.getSize() > intervalZ.getSize() ? 0 : 2;
+        else
+            return intervalY.getSize() > intervalZ.getSize() ? 1 : 2;
+    }
+
+    static const AABB empty, universe;
 };
+
+
+const AABB AABB::empty = AABB(Interval::empty, Interval::empty, Interval::empty);
+const AABB AABB::universe = AABB(Interval::universe, Interval::universe, Interval::universe);
 
 #endif
