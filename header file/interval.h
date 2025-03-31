@@ -11,6 +11,12 @@ public:
 
     Interval(double min, double max) : min(min), max(max) {}
 
+    Interval(Interval lhs, Interval rhs) {
+        // Create the interval tightly enclosing the two input intervals.
+        min = lhs.min <= rhs.min ? lhs.min : rhs.min;
+        max = lhs.max >= rhs.max ? lhs.max : rhs.max;
+    }
+
     double getSize() const {
         return max - min;
     }
