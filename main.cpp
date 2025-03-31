@@ -1,5 +1,6 @@
 #include "ray_utility.h"
 
+#include "bvh.h"
 #include "camera.h"
 #include "hittable.h"
 #include "hittable_list.h"
@@ -65,6 +66,7 @@ int main() {
     auto material3 = std::make_shared<Metal>(Color(0.7, 0.6, 0.5), 0.0);
     world.add(std::make_shared<Sphere>(Point3(4, 1, 0), 1.0, material3));
 
+    world = HittableList(std::make_shared<BVHNode>(world));
 
     Camera camera;
     camera.aspectRatio = 16.0 / 9.0;
