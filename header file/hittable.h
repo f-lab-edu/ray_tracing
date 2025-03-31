@@ -2,6 +2,7 @@
 #define HITTABLE_H
 
 #include "ray_utility.h"
+#include "aabb.h"
 
 class Material;
 
@@ -24,6 +25,7 @@ public:
     virtual ~Hittable() = default;
 
     virtual bool isHit(const Ray& inputRay, Interval rayInterval, HitRecord& record) const = 0;
+    virtual AABB getBoundingBox() const = 0;
 };
 
 #endif
