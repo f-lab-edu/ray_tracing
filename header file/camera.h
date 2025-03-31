@@ -93,8 +93,9 @@ private:
 
         auto rayOrigin = (defocusAngle <= 0) ? center : getDefocusRandomPoint();
         auto rayDirection = pixelSample - rayOrigin;
+        auto rayTime = getRandomDouble();
 
-        return Ray(rayOrigin, rayDirection);
+        return Ray(rayOrigin, rayDirection, rayTime);
     }
 
     Point3 getDefocusRandomPoint() const {
