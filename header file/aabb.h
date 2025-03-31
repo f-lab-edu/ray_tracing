@@ -21,6 +21,12 @@ public:
         intervalZ = (a[2] <= b[2]) ? Interval(a[2], b[2]) : Interval(b[2], a[2]);
     }
 
+    AABB(const AABB& lhs, const AABB& rhs) {
+        intervalX = Interval(lhs.intervalX, rhs.intervalX);
+        intervalY = Interval(lhs.intervalY, rhs.intervalY);
+        intervalZ = Interval(lhs.intervalZ, rhs.intervalZ);
+    }
+
     const Interval& getAxisInterval(int n) const {
         if (n == 1) return intervalY;
         if (n == 2) return intervalZ;
