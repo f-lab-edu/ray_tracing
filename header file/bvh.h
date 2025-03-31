@@ -17,17 +17,21 @@ public:
     }
 
     BVHNode(std::vector<std::shared_ptr<Hittable>>& objects, size_t start, size_t end) {
-        int axis = getRandomInt(0, 2);
+        boundingBox = AABB::empty;
 
+        // now calculate the final boundingBox first
+        for (size_t currentObjectIndex = start; currentObjectIndex < end; ++currentObjectIndex)
+            boundingBox = AABB(boundingBox, objects[currentObjectIndex]->getBoundingBox());
+        
+        int axis = boundingBox.getLongestAxisIndex();       // optimization applied
         auto comparator = compareBoxZ;
         if (axis == 0)
             comparator = compareBoxX;
         else if (axis == 1)
             comparator = compareBoxY;
 
+        // then calculate the boundingBoxes for its left and right children
         size_t objectSpan = end - start;
-
-        // set the bounding boxes for left and right children first
         if (objectSpan == 1)
             left = right = objects[start];
         else if (objectSpan == 2) {
@@ -41,9 +45,6 @@ public:
             left = std::make_shared<BVHNode>(objects, start, mid);
             right = std::make_shared<BVHNode>(objects, mid, end);
         }
-
-        // then the node’s bounding box is set to enclose both of its children’s AABBs
-        boundingBox = AABB(left->getBoundingBox(), right->getBoundingBox());
     }
 
     bool isHit(const Ray& inputRay, Interval timeIntervalToCheck, HitRecord& record) const override {
