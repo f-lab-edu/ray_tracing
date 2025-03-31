@@ -23,7 +23,7 @@ public:
         if (scatteredVector.isNearZero())
             scatteredVector = record.normalizedVector;
 
-        scatteredRay = Ray(record.hitPosition, scatteredVector);
+        scatteredRay = Ray(record.hitPosition, scatteredVector, inputRay.getTime());
         attenuation = albedo;
         return true;
     }
@@ -45,7 +45,7 @@ public:
     bool doesScatter(const Ray &inputRay, const HitRecord &record, Color &attenuation, Ray &scatteredRay) const override {
         Vec3 reflectedVector = getReflectedMirror(inputRay.getDirection(), record.normalizedVector);
         reflectedVector = getUnitVector(reflectedVector) + (fuzz * getRandomUnitVector());
-        scatteredRay = Ray(record.hitPosition, reflectedVector);
+        scatteredRay = Ray(record.hitPosition, reflectedVector, inputRay.getTime());
         attenuation = albedo;
         return (performDot(scatteredRay.getDirection(), record.normalizedVector) > 0);
     }
@@ -75,7 +75,7 @@ public:
         else
             finalRay = getRefracted(normalizedInputVector, record.normalizedVector, finalRefractionIndex);
 
-        scatteredRay = Ray(record.hitPosition, finalRay);
+        scatteredRay = Ray(record.hitPosition, finalRay, inputRay.getTime());
         return true;
     }
 
