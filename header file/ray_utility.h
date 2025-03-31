@@ -28,6 +28,11 @@ inline double getRandomDouble() {
     return getRandomDouble(0.0, 1.0);
 }
 
+inline int getRandomInt(int min, int max) {
+    // Returns a random integer in [min,max].
+    return int(getRandomDouble(min, max + 1));
+}
+
 
 // Common Headers
 #include "vec3.h"
