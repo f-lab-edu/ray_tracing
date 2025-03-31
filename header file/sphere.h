@@ -6,10 +6,14 @@
 
 class Sphere : public Hittable {
 public:
-    Sphere(const Point3& center, double radius, std::shared_ptr<Material> inputMaterial) : center(center), radius(std::fmax(0, radius)), material(inputMaterial) {}
+    Sphere(const Point3& staticCenter, double radiusInput, std::shared_ptr<Material> materialInput) 
+        : center(staticCenter, Vec3(0,0,0)), radius(std::fmax(0, radiusInput)), material(materialInput) {}
+    Sphere(const Point3& centerStart, const Point3& centerEnd, double radiusInput, std::shared_ptr<Material> materialInput)
+        : center(centerStart, centerEnd - centerStart), radius(std::fmax(0, radiusInput)), material(materialInput) {}
 
     bool isHit(const Ray& inputRay, Interval rayInterval, HitRecord& record) const override {
-        Vec3 oc = center - inputRay.getOrigin();
+        Point3 currentCenter = center.getPosition(inputRay.getTime());
+        Vec3 oc = currentCenter - inputRay.getOrigin();
         auto a = inputRay.getDirection().getLengthSquared();
         auto h = performDot(inputRay.getDirection(), oc);
         auto c = oc.getLengthSquared() - radius * radius;
@@ -30,7 +34,7 @@ public:
 
         record.root = root;
         record.hitPosition = inputRay.getPosition(record.root);
-        Vec3 outwardNormal = (record.hitPosition - center) / radius;
+        Vec3 outwardNormal = (record.hitPosition - currentCenter) / radius;
         record.setFaceNormal(inputRay, outwardNormal);
         record.material = material;
 
@@ -38,7 +42,7 @@ public:
     }
 
 private:
-    Point3 center;
+    Ray center;
     double radius;
     std::shared_ptr<Material> material;
 };
