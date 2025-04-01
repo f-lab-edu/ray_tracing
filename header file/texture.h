@@ -1,97 +1,55 @@
-#ifndef MATERIAL_H
-#define MATERIAL_H
+#ifndef TEXTURE_H
+#define TEXTURE_H
 
-#include "hittable.h"
-#include "texture.h"
+#include "ray_utility.h"
 
-class Material {
+
+class Texture {
 public:
-    virtual ~Material() = default;
+    virtual ~Texture() = default;
 
-    virtual bool doesScatter(const Ray &inputRay, const HitRecord &record, Color &attenuation, Ray &scatteredRay) const {
-        return false;
-    }
-};
-
-class Lambertian : public Material {
-public:
-    Lambertian(const Color& inputAlbedo) : texture(std::make_shared<ConstantTexture>(inputAlbedo)) {}
-    Lambertian(std::shared_ptr<Texture> inputTexture) : texture(inputTexture) {}
-
-    bool doesScatter(const Ray &inputRay, const HitRecord &record, Color &attenuation, Ray &scatteredRay) const override {
-        auto scatteredVector = record.normalizedVector + getRandomUnitVector();
-
-        // handling invalid scattering
-        if (scatteredVector.isNearZero())
-            scatteredVector = record.normalizedVector;
-
-        scatteredRay = Ray(record.hitPosition, scatteredVector, inputRay.getTime());
-        attenuation = texture->getColor(record.u, record.v, record.hitPosition);
-        return true;
-    }
-
-private:
-    std::shared_ptr<Texture> texture;
+    virtual Color getColor(double u, double v, const Point3& position) const = 0;
 };
 
 
-class Metal : public Material {
+class ConstantTexture : public Texture {
 public:
-    Metal(const Color& inputAlbedo, double inputFuzz) : albedo(inputAlbedo), fuzz(inputFuzz) {
-        if (inputFuzz < -1)
-            inputFuzz = -1;
-        else if (inputFuzz > 1)
-            inputFuzz = 1;
-    }
+    ConstantTexture(const Color& albedo) : albedo(albedo) {}
 
-    bool doesScatter(const Ray &inputRay, const HitRecord &record, Color &attenuation, Ray &scatteredRay) const override {
-        Vec3 reflectedVector = getReflectedMirror(inputRay.getDirection(), record.normalizedVector);
-        reflectedVector = getUnitVector(reflectedVector) + (fuzz * getRandomUnitVector());
-        scatteredRay = Ray(record.hitPosition, reflectedVector, inputRay.getTime());
-        attenuation = albedo;
-        return (performDot(scatteredRay.getDirection(), record.normalizedVector) > 0);
+    ConstantTexture(double red, double green, double blue) : ConstantTexture(Color(red, green, blue)) {}
+
+    Color getColor(double u, double v, const Point3& position) const override {
+        return albedo;
     }
 
 private:
     Color albedo;
-    double fuzz;
 };
 
-
-class Dielectric : public Material {
+class CheckerTexture  : public Texture {
 public:
-    Dielectric(double inputRefractionIndex) : refractionIndex(inputRefractionIndex) {}
+    CheckerTexture (double scale, std::shared_ptr<Texture> even, std::shared_ptr<Texture> odd)
+        : inverseScale(1.0 / scale), textureForEven(even), textureForOdd(odd) {
+    }
 
-    bool doesScatter(const Ray &inputRay, const HitRecord &record, Color &attenuation, Ray &scatteredRay) const override {
-        attenuation = Color(1.0, 1.0, 1.0);
-        double finalRefractionIndex = record.frontFace ? (1.0 / refractionIndex) : refractionIndex;
+    CheckerTexture (double scale, const Color& c1, const Color& c2)
+        : CheckerTexture (scale, std::make_shared<ConstantTexture>(c1), std::make_shared<ConstantTexture>(c2)) {
+    }
 
-        Vec3 normalizedInputVector = getUnitVector(inputRay.getDirection());
-        double cosTheta = std::fmin(performDot(-normalizedInputVector, record.normalizedVector), 1.0);
-        double sinTheta = std::sqrt(1.0 - cosTheta * cosTheta);
+    Color getColor(double u, double v, const Point3& position) const override {
+        auto xInteger = int(std::floor(inverseScale * position.getX()));
+        auto yInteger = int(std::floor(inverseScale * position.getY()));
+        auto zInteger = int(std::floor(inverseScale * position.getZ()));
 
-        bool canRefracted = finalRefractionIndex * sinTheta > 1.0;
-        Vec3 finalRay;      // this can be made from reflection or refraction
-        if (canRefracted || getReflectance(cosTheta, finalRefractionIndex) > getRandomDouble(0, 1))
-            finalRay = getReflectedMirror(normalizedInputVector, record.normalizedVector);
-        else
-            finalRay = getRefracted(normalizedInputVector, record.normalizedVector, finalRefractionIndex);
+        bool isEven = (xInteger + yInteger + zInteger) % 2 == 0;
 
-        scatteredRay = Ray(record.hitPosition, finalRay, inputRay.getTime());
-        return true;
+        return isEven ? textureForEven->getColor(u, v, position) : textureForOdd->getColor(u, v, position);
     }
 
 private:
-    // Refractive index in vacuum or air, or the ratio of the material's refractive index over
-    // the refractive index of the enclosing media
-    double refractionIndex;
-
-    static double getReflectance(double cosine, double inputRefractionIndex) {
-        // Use Schlick's approximation for reflectance.
-        auto r0 = (1 - inputRefractionIndex) / (1 + inputRefractionIndex);
-        r0 = r0 * r0;
-        return r0 + (1 - r0) * std::pow((1 - cosine), 5);
-    }
+    double inverseScale;
+    std::shared_ptr<Texture> textureForEven;
+    std::shared_ptr<Texture> textureForOdd;
 };
 
 #endif
