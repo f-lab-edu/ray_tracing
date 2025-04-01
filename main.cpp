@@ -20,8 +20,7 @@ double isHitSphere(const Point3& sphereCenter, double sphereRadius, const Ray& i
         return (h -sqrt(determinant)) / a;
 }
 
-
-int main() {
+void renderBouncingSpheres() {
     HittableList world;
 
     auto ground = std::make_shared<CheckerTexture>(0.32, Color(0.2, 0.3, 0.1), Color(0.9, 0.9, 0.9));
@@ -85,6 +84,38 @@ int main() {
 
 
     camera.render(world);
+}
+
+void renderCheckeredSpheres() {
+    HittableList world;
+
+    auto checker = std::make_shared<CheckerTexture>(0.32, Color(.2, .3, .1), Color(.9, .9, .9));
+
+    world.add(std::make_shared<Sphere>(Point3(0, -10, 0), 10, std::make_shared<Lambertian>(checker)));
+    world.add(std::make_shared<Sphere>(Point3(0, 10, 0), 10, std::make_shared<Lambertian>(checker)));
+
+    Camera camera;
+
+    camera.aspectRatio = 16.0 / 9.0;
+    camera.imageWidth = 400;
+    camera.samplesPerPixel= 100;
+    camera.maxDepth = 50;
+
+    camera.verticalFOV = 20;
+    camera.lookFrom = Point3(13, 2, 3);
+    camera.lookAt = Point3(0, 0, 0);
+    camera.upVector = Vec3(0, 1, 0);
+
+    camera.defocusAngle = 0;
+
+    camera.render(world);
+}
+
+
+int main() {
+    //renderBouncingSpheres();
+    renderCheckeredSpheres();
+
 
     return 0;
 }
