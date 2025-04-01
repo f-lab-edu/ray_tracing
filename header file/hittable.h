@@ -11,6 +11,7 @@ struct HitRecord {
     Vec3 normalizedVector;
     std::shared_ptr<Material> material;
     double root;
+    double u, v;
     bool frontFace;
 
     void setFaceNormal(const Ray& inputRay, const Vec3& outwardNormal) {
