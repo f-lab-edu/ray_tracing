@@ -6,6 +6,7 @@
 #include "hittable_list.h"
 #include "material.h"
 #include "Sphere.h"
+#include "texture.h"
 
 double isHitSphere(const Point3& sphereCenter, double sphereRadius, const Ray& inputRay) {
     Vec3 cq = sphereCenter - inputRay.getOrigin();      // C - Q
@@ -23,8 +24,8 @@ double isHitSphere(const Point3& sphereCenter, double sphereRadius, const Ray& i
 int main() {
     HittableList world;
 
-    auto groundMaterial = std::make_shared<Lambertian>(Color(0.5, 0.5, 0.5));
-    world.add(std::make_shared<Sphere>(Point3(0, -1000, 0), 1000, groundMaterial));
+    auto ground = std::make_shared<CheckerTexture>(0.32, Color(0.2, 0.3, 0.1), Color(0.9, 0.9, 0.9));
+    world.add(std::make_shared<Sphere>(Point3(0, -1000, 0), 1000, std::make_shared<Lambertian>(ground)));
 
     for (int a = -11; a < 11; a++) {
         for (int b = -11; b < 11; b++) {
