@@ -2,7 +2,7 @@
 #define TEXTURE_H
 
 #include "ray_utility.h"
-#include "stb_helper.h"
+#include "stb_image_helper.h"
 
 
 class Texture {
