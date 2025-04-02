@@ -74,7 +74,7 @@ public:
     }
 
 private:
-    STBHelper image;
+    STBImageHelper image;
 };
 
 
