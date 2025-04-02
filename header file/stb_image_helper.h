@@ -13,11 +13,11 @@
 #include <cstdlib>
 #include <iostream>
 
-class STBHelper {
+class STBImageHelper {
 public:
-    STBHelper() {}
+    STBImageHelper() {}
 
-    STBHelper(const char* imageFileName) {
+    STBImageHelper(const char* imageFileName) {
         // Loads image data from the specified file. If the RTW_IMAGES environment variable is
         // defined, looks only in that directory for the image file. If the image was not found,
         // searches for the specified image file first from the current directory, then in the
@@ -27,12 +27,12 @@ public:
 
         auto filename = std::string(imageFileName);
         //auto imageDirectory = getenv("RTW_IMAGES");
+        if (load(filename)) return;
 
         // Hunt for the image file in some likely locations.
-        if (load("images/" + filename)) return;
         /*
         if (imagedir && load(std::string(imagedir) + "/" + image_filename)) return;
-        if (load(filename)) return;
+        if (load("images/" + filename)) return;
         if (load("../images/" + filename)) return;
         if (load("../../images/" + filename)) return;
         if (load("../../../images/" + filename)) return;
@@ -44,7 +44,7 @@ public:
         std::cerr << "ERROR: Could not load image file '" << imageFileName << "'.\n";
     }
 
-    ~STBHelper() {
+    ~STBImageHelper() {
         delete[] bData;
         STBI_FREE(fData);
     }
