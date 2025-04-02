@@ -49,6 +49,7 @@ public:
         record.hitPosition = inputRay.getPosition(record.root);
         Vec3 outwardNormal = (record.hitPosition - currentCenter) / radius;
         record.setFaceNormal(inputRay, outwardNormal);
+        getSphereUV(outwardNormal, record.u, record.v);
         record.material = material;
 
         return true;
@@ -59,6 +60,22 @@ public:
     }
 
 private:
+    static void getSphereUV(const Point3& hitPosition, double& u, double& v) {
+        // p: a given point on the sphere of radius one, centered at the origin.
+        // u: returned value [0,1] of angle around the Y axis from X=-1.
+        // v: returned value [0,1] of angle from Y=-1 to Y=+1.
+        //     <1 0 0> yields <0.50 0.50>       <-1  0  0> yields <0.00 0.50>
+        //     <0 1 0> yields <0.50 1.00>       < 0 -1  0> yields <0.50 0.00>
+        //     <0 0 1> yields <0.25 0.50>       < 0  0 -1> yields <0.75 0.50>
+
+        auto theta = std::acos(-hitPosition.getY());
+        auto phi = std::atan2(-hitPosition.getZ(), hitPosition.getX()) + PI;
+
+        u = phi / (2 * PI);
+        v = theta / PI;
+    }
+
+
     Ray center;
     double radius;
     std::shared_ptr<Material> material;
