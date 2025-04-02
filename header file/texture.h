@@ -2,6 +2,7 @@
 #define TEXTURE_H
 
 #include "ray_utility.h"
+#include "stb_helper.h"
 
 
 class Texture {
@@ -51,5 +52,30 @@ private:
     std::shared_ptr<Texture> textureForEven;
     std::shared_ptr<Texture> textureForOdd;
 };
+
+class ImageTexture : public Texture {
+public:
+    ImageTexture(const char* fileName) : image(fileName) {}
+
+    Color getColor(double u, double v, const Point3& position) const override {
+        // If we have no texture data, then return solid cyan as a debugging aid.
+        if (image.getHeight() <= 0) return Color(0, 1, 1);
+
+        // Clamp input texture coordinates to [0,1] x [1,0]
+        u = Interval(0, 1).clamp(u);
+        v = 1.0 - Interval(0, 1).clamp(v);  // Flip V to image coordinates
+
+        auto x = int(u * image.getWidth());
+        auto y = int(v * image.getHeight());
+        auto pixel = image.getPixelData(x, y);
+
+        auto colorScale = 1.0 / 255.0;
+        return Color(colorScale * pixel[0], colorScale * pixel[1], colorScale * pixel[2]);
+    }
+
+private:
+    STBHelper image;
+};
+
 
 #endif
