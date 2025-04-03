@@ -136,7 +136,7 @@ void renderEarth() {
 void renderPerlinSpheres() {
     HittableList world;
 
-    auto pertext = std::make_shared<NoiseTexture>();
+    auto pertext = std::make_shared<NoiseTexture>(4);
     world.add(std::make_shared<Sphere>(Point3(0, -1000, 0), 1000, std::make_shared<Lambertian>(pertext)));
     world.add(std::make_shared<Sphere>(Point3(0, 2, 0), 2, std::make_shared<Lambertian>(pertext)));
 
