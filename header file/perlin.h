@@ -1,82 +1,95 @@
-#ifndef PERLIN_H
-#define PERLIN_H
+#ifndef TEXTURE_H
+#define TEXTURE_H
 
 #include "ray_utility.h"
+#include "perlin.h"
+#include "stb_image_helper.h"
 
-class Perlin {
+
+class Texture {
 public:
-    Perlin() {
-        for (int currentPoint = 0; currentPoint < POINT_COUNT; ++currentPoint)
-            tableFloat[currentPoint] = getRandomDouble();
+    virtual ~Texture() = default;
 
-        generatePermutationTable(tablePermutationX);
-        generatePermutationTable(tablePermutationY);
-        generatePermutationTable(tablePermutationZ);
-    }
-
-    double getNoise(const Point3& hitPosition) const {
-        auto u = hitPosition.getX() - std::floor(hitPosition.getX());
-        auto v = hitPosition.getY() - std::floor(hitPosition.getY());
-        auto w = hitPosition.getZ() - std::floor(hitPosition.getZ());
-
-        u = u * u * (3 - 2 * u);
-        v = v * v * (3 - 2 * v);
-        w = w * w * (3 - 2 * w);
+    virtual Color getColor(double u, double v, const Point3& position) const = 0;
+};
 
 
+class ConstantTexture : public Texture {
+public:
+    ConstantTexture(const Color& albedo) : albedo(albedo) {}
 
-        auto i = int(std::floor(hitPosition.getX()));
-        auto j = int(std::floor(hitPosition.getY()));
-        auto k = int(std::floor(hitPosition.getZ()));
-        double c[2][2][2];
+    ConstantTexture(double red, double green, double blue) : ConstantTexture(Color(red, green, blue)) {}
 
-        for (int di = 0; di < 2; di++)
-            for (int dj = 0; dj < 2; dj++)
-                for (int dk = 0; dk < 2; dk++)
-                    c[di][dj][dk] = tableFloat[
-                        tablePermutationX[(i + di) & 255] ^
-                            tablePermutationY[(j + dj) & 255] ^
-                            tablePermutationZ[(k + dk) & 255]
-                    ];
-
-        return getTrilinearInterpolation(c, u, v, w);
+    Color getColor(double u, double v, const Point3& position) const override {
+        return albedo;
     }
 
 private:
-    static void generatePermutationTable(int* currentTable) {
-        for (int currentPoint = 0; currentPoint < POINT_COUNT; ++currentPoint)
-            currentTable[currentPoint] = currentPoint;
+    Color albedo;
+};
 
-        permute(currentTable, POINT_COUNT);
+class CheckerTexture  : public Texture {
+public:
+    CheckerTexture (double scale, std::shared_ptr<Texture> even, std::shared_ptr<Texture> odd)
+        : inverseScale(1.0 / scale), textureForEven(even), textureForOdd(odd) {
     }
 
-    static void permute(int* currentTable, const int END_POINT) {
-        for (int currentPoint = END_POINT - 1; currentPoint > 0; --currentPoint) {
-            int target = getRandomInt(0, currentPoint);
-            int tempValue = currentTable[currentPoint];
-            currentTable[currentPoint] = currentTable[target];
-            currentTable[target] = tempValue;
-        }
+    CheckerTexture (double scale, const Color& c1, const Color& c2)
+        : CheckerTexture (scale, std::make_shared<ConstantTexture>(c1), std::make_shared<ConstantTexture>(c2)) {
     }
 
-    static double getTrilinearInterpolation(double c[2][2][2], double u, double v, double w) {
-        auto accumulatedValue = 0.0;
-        for (int i = 0; i < 2; i++)
-            for (int j = 0; j < 2; j++)
-                for (int k = 0; k < 2; k++)
-                    accumulatedValue += (i * u + (1 - i) * (1 - u))
-                    * (j * v + (1 - j) * (1 - v))
-                    * (k * w + (1 - k) * (1 - w))
-                    * c[i][j][k];
+    Color getColor(double u, double v, const Point3& position) const override {
+        auto xInteger = int(std::floor(inverseScale * position.getX()));
+        auto yInteger = int(std::floor(inverseScale * position.getY()));
+        auto zInteger = int(std::floor(inverseScale * position.getZ()));
 
-        return accumulatedValue;
+        bool isEven = (xInteger + yInteger + zInteger) % 2 == 0;
+
+        return isEven ? textureForEven->getColor(u, v, position) : textureForOdd->getColor(u, v, position);
     }
 
-    static constexpr int POINT_COUNT = 256;
-    double tableFloat[POINT_COUNT];
-    int tablePermutationX[POINT_COUNT];
-    int tablePermutationY[POINT_COUNT];
-    int tablePermutationZ[POINT_COUNT];
+private:
+    double inverseScale;
+    std::shared_ptr<Texture> textureForEven;
+    std::shared_ptr<Texture> textureForOdd;
+};
+
+class ImageTexture : public Texture {
+public:
+    ImageTexture(const char* fileName) : image(fileName) {}
+
+    Color getColor(double u, double v, const Point3& position) const override {
+        // If we have no texture data, then return solid cyan as a debugging aid.
+        if (image.getHeight() <= 0) return Color(0, 1, 1);
+
+        // Clamp input texture coordinates to [0,1] x [1,0]
+        u = Interval(0, 1).clamp(u);
+        v = 1.0 - Interval(0, 1).clamp(v);  // Flip V to image coordinates
+
+        auto x = int(u * image.getWidth());
+        auto y = int(v * image.getHeight());
+        auto pixel = image.getPixelData(x, y);
+
+        auto colorScale = 1.0 / 255.0;
+        return Color(colorScale * pixel[0], colorScale * pixel[1], colorScale * pixel[2]);
+    }
+
+private:
+    STBImageHelper image;
+};
+
+
+class NoiseTexture : public Texture {
+public:
+    NoiseTexture(double inputScale) : scale(inputScale) {}
+
+    Color getColor(double u, double v, const Point3& position) const override {
+        return Color(1, 1, 1) * perlin.getNoise(scale * position);
+    }
+
+private:
+    Perlin perlin;
+    double scale;
 };
 
 #endif
