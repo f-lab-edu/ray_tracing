@@ -19,6 +19,12 @@ public:
         auto v = hitPosition.getY() - std::floor(hitPosition.getY());
         auto w = hitPosition.getZ() - std::floor(hitPosition.getZ());
 
+        u = u * u * (3 - 2 * u);
+        v = v * v * (3 - 2 * v);
+        w = w * w * (3 - 2 * w);
+
+
+
         auto i = int(std::floor(hitPosition.getX()));
         auto j = int(std::floor(hitPosition.getY()));
         auto k = int(std::floor(hitPosition.getZ()));
