@@ -40,6 +40,19 @@ public:
 
         return getPerlinInterpolation(c, u, v, w);
     }
+    double getTurbulence(const Point3& hitPosition, int depth) const {
+        auto accumulatedValue = 0.0;
+        auto tempPosition = hitPosition;
+        auto weight = 1.0;
+
+        for (int i = 0; i < depth; i++) {
+            accumulatedValue += weight * getNoise(tempPosition);
+            weight *= 0.5;
+            tempPosition *= 2;
+        }
+
+        return std::fabs(accumulatedValue);
+    }
 
 private:
     static void generatePermutationTable(int* currentTable) {
