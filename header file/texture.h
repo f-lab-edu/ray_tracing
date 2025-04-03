@@ -84,7 +84,7 @@ public:
     NoiseTexture(double inputScale) : scale(inputScale) {}
 
     Color getColor(double u, double v, const Point3& position) const override {
-        return Color(1, 1, 1) * 0.5 * (1.0 + perlin.getNoise(scale * position));
+        return Color(1, 1, 1) * perlin.getTurbulence(position, 7);
     }
 
 private:
