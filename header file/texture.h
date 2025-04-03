@@ -2,6 +2,7 @@
 #define TEXTURE_H
 
 #include "ray_utility.h"
+#include "perlin.h"
 #include "stb_image_helper.h"
 
 
@@ -77,5 +78,17 @@ private:
     STBImageHelper image;
 };
 
+
+class NoiseTexture : public Texture {
+public:
+    NoiseTexture() {}
+
+    Color getColor(double u, double v, const Point3& position) const override {
+        return Color(1, 1, 1) * perlin.getNoise(position);
+    }
+
+private:
+    Perlin perlin;
+};
 
 #endif
