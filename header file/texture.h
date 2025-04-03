@@ -81,14 +81,15 @@ private:
 
 class NoiseTexture : public Texture {
 public:
-    NoiseTexture() {}
+    NoiseTexture(double inputScale) : scale(inputScale) {}
 
     Color getColor(double u, double v, const Point3& position) const override {
-        return Color(1, 1, 1) * perlin.getNoise(position);
+        return Color(1, 1, 1) * 0.5 * (1.0 + perlin.getNoise(scale * position));
     }
 
 private:
     Perlin perlin;
+    double scale;
 };
 
 #endif
