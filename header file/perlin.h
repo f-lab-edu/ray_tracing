@@ -15,20 +15,28 @@ public:
     }
 
     double getNoise(const Point3& hitPosition) const {
-        auto i = int(4 * hitPosition.getX()) & (POINT_COUNT - 1);
-        auto j = int(4 * hitPosition.getY()) & (POINT_COUNT - 1);
-        auto k = int(4 * hitPosition.getZ()) & (POINT_COUNT - 1);
+        auto u = hitPosition.getX() - std::floor(hitPosition.getX());
+        auto v = hitPosition.getY() - std::floor(hitPosition.getY());
+        auto w = hitPosition.getZ() - std::floor(hitPosition.getZ());
 
-        return tableFloat[tablePermutationX[i] ^ tablePermutationY[j] ^ tablePermutationY[k]];
+        auto i = int(std::floor(hitPosition.getX()));
+        auto j = int(std::floor(hitPosition.getY()));
+        auto k = int(std::floor(hitPosition.getZ()));
+        double c[2][2][2];
+
+        for (int di = 0; di < 2; di++)
+            for (int dj = 0; dj < 2; dj++)
+                for (int dk = 0; dk < 2; dk++)
+                    c[di][dj][dk] = tableFloat[
+                        tablePermutationX[(i + di) & 255] ^
+                            tablePermutationY[(j + dj) & 255] ^
+                            tablePermutationZ[(k + dk) & 255]
+                    ];
+
+        return getTrilinearInterpolation(c, u, v, w);
     }
 
 private:
-    static constexpr int POINT_COUNT = 256;
-    double tableFloat[POINT_COUNT];
-    int tablePermutationX[POINT_COUNT];
-    int tablePermutationY[POINT_COUNT];
-    int tablePermutationZ[POINT_COUNT];
-
     static void generatePermutationTable(int* currentTable) {
         for (int currentPoint = 0; currentPoint < POINT_COUNT; ++currentPoint)
             currentTable[currentPoint] = currentPoint;
@@ -44,6 +52,25 @@ private:
             currentTable[target] = tempValue;
         }
     }
+
+    static double getTrilinearInterpolation(double c[2][2][2], double u, double v, double w) {
+        auto accumulatedValue = 0.0;
+        for (int i = 0; i < 2; i++)
+            for (int j = 0; j < 2; j++)
+                for (int k = 0; k < 2; k++)
+                    accumulatedValue += (i * u + (1 - i) * (1 - u))
+                    * (j * v + (1 - j) * (1 - v))
+                    * (k * w + (1 - k) * (1 - w))
+                    * c[i][j][k];
+
+        return accumulatedValue;
+    }
+
+    static constexpr int POINT_COUNT = 256;
+    double tableFloat[POINT_COUNT];
+    int tablePermutationX[POINT_COUNT];
+    int tablePermutationY[POINT_COUNT];
+    int tablePermutationZ[POINT_COUNT];
 };
 
 #endif
