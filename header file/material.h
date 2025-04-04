@@ -64,7 +64,7 @@ public:
 
     bool doesScatter(const Ray &inputRay, const HitRecord &record, Color &attenuation, Ray &scatteredRay) const override {
         attenuation = Color(1.0, 1.0, 1.0);
-        double finalRefractionIndex = record.frontFace ? (1.0 / refractionIndex) : refractionIndex;
+        double finalRefractionIndex = record.isFrontFace ? (1.0 / refractionIndex) : refractionIndex;
 
         Vec3 normalizedInputVector = getUnitVector(inputRay.getDirection());
         double cosTheta = std::fmin(performDot(-normalizedInputVector, record.normalizedVector), 1.0);
