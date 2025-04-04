@@ -5,6 +5,7 @@
 #include "hittable.h"
 #include "hittable_list.h"
 #include "material.h"
+#include "Quad.h"
 #include "Sphere.h"
 #include "texture.h"
 
@@ -157,13 +158,47 @@ void renderPerlinSpheres() {
     camera.render(world);
 }
 
+void renderQuads() {
+    HittableList world;
+
+    // Materials
+    auto left_red = std::make_shared<Lambertian>(Color(1.0, 0.2, 0.2));
+    auto back_green = std::make_shared<Lambertian>(Color(0.2, 1.0, 0.2));
+    auto right_blue = std::make_shared<Lambertian>(Color(0.2, 0.2, 1.0));
+    auto upper_orange = std::make_shared<Lambertian>(Color(1.0, 0.5, 0.0));
+    auto lower_teal = std::make_shared<Lambertian>(Color(0.2, 0.8, 0.8));
+
+    // Quads
+    world.add(std::make_shared<Quad>(Point3(-3, -2, 5), Vec3(0, 0, -4), Vec3(0, 4, 0), left_red));
+    world.add(std::make_shared<Quad>(Point3(-2, -2, 0), Vec3(4, 0, 0), Vec3(0, 4, 0), back_green));
+    world.add(std::make_shared<Quad>(Point3(3, -2, 1), Vec3(0, 0, 4), Vec3(0, 4, 0), right_blue));
+    world.add(std::make_shared<Quad>(Point3(-2, 3, 1), Vec3(4, 0, 0), Vec3(0, 0, 4), upper_orange));
+    world.add(std::make_shared<Quad>(Point3(-2, -3, 5), Vec3(4, 0, 0), Vec3(0, 0, -4), lower_teal));
+
+    Camera camera;
+
+    camera.aspectRatio = 1.0;
+    camera.imageWidth = 400;
+    camera.samplesPerPixel = 100;
+    camera.maxDepth = 50;
+
+    camera.verticalFOV = 80;
+    camera.lookFrom = Point3(0, 0, 9);
+    camera.lookAt = Point3(0, 0, 0);
+    camera.upVector = Vec3(0, 1, 0);
+
+    camera.defocusAngle = 0;
+
+    camera.render(world);
+}
+
 
 int main() {
     //renderBouncingSpheres();
     //renderCheckeredSpheres();
     //renderEarth();
-    renderPerlinSpheres();
-
-
+    //renderPerlinSpheres();
+    renderQuads();
+    
     return 0;
 }
