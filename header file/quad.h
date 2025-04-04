@@ -8,8 +8,9 @@ class Quad : public Hittable {
 public:
     Quad(const Point3& inputQ, const Vec3& inputU, const Vec3& inputV, std::shared_ptr<Material> inputMaterial)
         : q(inputQ), u(inputU), v(inputV), material(inputMaterial) {
-        
-        normalVector = getUnitVector(performCross(u, v));
+        auto n = performCross(u, v);
+        k = n / performDot(n, n);
+        normalVector = getUnitVector(n);
 
         setBoundingBox();
     }
@@ -41,8 +42,8 @@ public:
         // Now we know that the ray hits the plane
         // Hence, we need to calculate alpha and beta to check whether they are inside the quad
         auto positionIntersect = inputRay.getPosition(timeIntersect);
-        auto alpha = performDot(performCross(positionIntersect - q, v), normalVector / performDot(normalVector, normalVector));
-        auto beta = performDot(performCross(u, positionIntersect - q), normalVector / performDot(normalVector, normalVector));
+        auto alpha = performDot(performCross(positionIntersect - q, v), k);
+        auto beta = performDot(performCross(u, positionIntersect - q), k);
 
         if (isInterior(alpha, beta, record) == false)
             return false;
@@ -71,9 +72,10 @@ public:
     }
 
 private:
-    Point3 q;       // bottom-left corner
-    Vec3 u, v;      // two sides
+    Point3 q;             // bottom-left corner
+    Vec3 u, v;            // two sides
     Vec3 normalVector;    // normal vector to the plane
+    Vec3 k;               // cached value before n is normalized
     std::shared_ptr<Material> material;
     AABB boundingBox;
 };
