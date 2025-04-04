@@ -52,7 +52,7 @@ public:
             return false;
 
         bool isHitLeft = left->isHit(inputRay, timeIntervalToCheck, record);
-        bool isHitRight = right->isHit(inputRay, Interval(timeIntervalToCheck.min, isHitLeft ? record.root : timeIntervalToCheck.max), record);
+        bool isHitRight = right->isHit(inputRay, Interval(timeIntervalToCheck.min, isHitLeft ? record.hitTime : timeIntervalToCheck.max), record);
 
         return isHitLeft || isHitRight;
     }
