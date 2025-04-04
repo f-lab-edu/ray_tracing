@@ -40,8 +40,9 @@ public:
 
         // Now we know that the ray hits the plane
         // Hence, we need to calculate alpha and beta to check whether they are inside the quad
-        auto alpha = performDot(performCross(inputRay.getOrigin() + timeIntersect * inputRay.getDirection() - q, v), normalVector / performDot(normalVector, normalVector));
-        auto beta = performDot(performCross(inputRay.getOrigin() + timeIntersect * inputRay.getDirection() - q, u), normalVector / performDot(normalVector, normalVector));
+        auto positionIntersect = inputRay.getPosition(timeIntersect);
+        auto alpha = performDot(performCross(positionIntersect - q, v), normalVector / performDot(normalVector, normalVector));
+        auto beta = performDot(performCross(u, positionIntersect - q), normalVector / performDot(normalVector, normalVector));
 
         if (isInterior(alpha, beta, record) == false)
             return false;
@@ -49,7 +50,7 @@ public:
         // Now we know that the ray hits the Quad
         // update information
         record.hitTime = timeIntersect;
-        record.hitPosition = inputRay.getPosition(record.hitTime);
+        record.hitPosition = positionIntersect;
         record.material = material;
         record.setFaceNormal(inputRay, normalVector);
 
