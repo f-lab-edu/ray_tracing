@@ -38,15 +38,15 @@ public:
         auto sqrtd = std::sqrt(discriminant);
 
         // Find the nearest root that lies in the acceptable range.
-        auto root = (h - sqrtd) / a;
-        if (root <= rayInterval.min || rayInterval.max <= root) {
-            root = (h + sqrtd) / a;
-            if (root <= rayInterval.min || rayInterval.max <= root)
+        auto hitTime = (h - sqrtd) / a;
+        if (hitTime <= rayInterval.min || rayInterval.max <= hitTime) {
+            hitTime = (h + sqrtd) / a;
+            if (hitTime <= rayInterval.min || rayInterval.max <= hitTime)
                 return false;
         }
 
-        record.root = root;
-        record.hitPosition = inputRay.getPosition(record.root);
+        record.hitTime = hitTime;
+        record.hitPosition = inputRay.getPosition(record.hitTime);
         Vec3 outwardNormal = (record.hitPosition - currentCenter) / radius;
         record.setFaceNormal(inputRay, outwardNormal);
         getSphereUV(outwardNormal, record.u, record.v);
