@@ -10,14 +10,14 @@ struct HitRecord {
     Point3 hitPosition;
     Vec3 normalizedVector;
     std::shared_ptr<Material> material;
-    double root;
+    double hitTime;
     double u, v;
-    bool frontFace;
+    bool isFrontFace;
 
     void setFaceNormal(const Ray& inputRay, const Vec3& outwardNormal) {
         // NOTE: the parameter `outward_normal` is assumed to have unit length.
-        frontFace = performDot(inputRay.getDirection(), outwardNormal) < 0.0;
-        normalizedVector = frontFace ? outwardNormal : -outwardNormal;
+        isFrontFace = performDot(inputRay.getDirection(), outwardNormal) < 0.0;
+        normalizedVector = isFrontFace ? outwardNormal : -outwardNormal;
     }
 };
 
