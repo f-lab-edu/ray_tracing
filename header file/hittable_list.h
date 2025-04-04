@@ -28,8 +28,8 @@ public:
         for (const auto& object : objects) {
             if (object->isHit(r, Interval(rayInteraval.min, closestSoFar), tempRecord)) {
                 isHitAnything = true;
-                if (tempRecord.root < closestSoFar) {
-                    closestSoFar = tempRecord.root;
+                if (tempRecord.hitTime < closestSoFar) {
+                    closestSoFar = tempRecord.hitTime;
                     record = tempRecord;
                 }
             }
