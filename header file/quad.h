@@ -8,6 +8,9 @@ class Quad : public Hittable {
 public:
     Quad(const Point3& inputQ, const Vec3& inputU, const Vec3& inputV, std::shared_ptr<Material> inputMaterial)
         : q(inputQ), u(inputU), v(inputV), material(inputMaterial) {
+        
+        normalVector = getUnitVector(performCross(u, v));
+
         setBoundingBox();
     }
 
@@ -23,12 +26,53 @@ public:
     }
 
     bool isHit(const Ray& inputRay, Interval timeIntervalToCheck, HitRecord& record) const override {
-        return false; // To be implemented
+        // tempA and tempB are from the plane equation
+        double tempA = performDot(normalVector, inputRay.getOrigin() - q), tempB = performDot(normalVector, inputRay.getDirection());
+
+        // No hit if the ray is parallel to the plane
+        if (std::fabs(tempB) < 1e-8)
+            return false;
+        auto timeIntersect = -tempA / tempB;
+
+        // No hit if the time of intersection is not inside the given interval
+        if (timeIntervalToCheck.doesContain(timeIntersect) == false)
+            return false;
+
+        // Now we know that the ray hits the plane
+        // Hence, we need to calculate alpha and beta to check whether they are inside the quad
+        auto alpha = performDot(performCross(inputRay.getOrigin() + timeIntersect * inputRay.getDirection() - q, v), normalVector / performDot(normalVector, normalVector));
+        auto beta = performDot(performCross(inputRay.getOrigin() + timeIntersect * inputRay.getDirection() - q, u), normalVector / performDot(normalVector, normalVector));
+
+        if (isInterior(alpha, beta, record) == false)
+            return false;
+        
+        // Now we know that the ray hits the Quad
+        // update information
+        record.hitTime = timeIntersect;
+        record.hitPosition = inputRay.getPosition(record.hitTime);
+        record.material = material;
+        record.setFaceNormal(inputRay, normalVector);
+
+        return true;
+    }
+
+    virtual bool isInterior(double a, double b, HitRecord& record) const {
+        Interval unitInterval = Interval(0, 1);
+        // Given the hit point in plane coordinates, return false if it is outside the
+        // primitive, otherwise set the hit record UV coordinates and return true.
+
+        if (!unitInterval.doesContain(a) || !unitInterval.doesContain(b))
+            return false;
+
+        record.u = a;
+        record.v = b;
+        return true;
     }
 
 private:
     Point3 q;       // bottom-left corner
     Vec3 u, v;      // two sides
+    Vec3 normalVector;    // normal vector to the plane
     std::shared_ptr<Material> material;
     AABB boundingBox;
 };
