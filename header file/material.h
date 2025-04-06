@@ -102,6 +102,9 @@ public:
     DiffuseLight(std::shared_ptr<Texture> inputTexture) : texture(inputTexture) {}
     DiffuseLight(const Color& emit) : texture(std::make_shared<ConstantTexture>(emit)) {}
 
+    // DiffuseLight doens't perform reflection
+    // Hence, only DiffuseLight returns false when the camera calls doesScatter() for Material objects
+
     Color getEmittedColor(double u, double v, const Point3& hitPosition) const override {
         // returns constant color by default
         return texture->getColor(u, v, hitPosition);
