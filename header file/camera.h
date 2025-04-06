@@ -10,6 +10,7 @@ public:
     int    imageWidth = 100;            // Rendered image width in pixel count
     int    samplesPerPixel = 10;        // Count of random sampels for each pixel
     int    maxDepth = 10;               // Maximum number of ray bounces into scene
+    Color  backgroundColor;             // Scene background color
 
     double verticalFOV = 90;            // vertical view angle
     Point3 lookFrom = Point3(0, 0, 0);  // Point camera is looking from
@@ -111,22 +112,27 @@ private:
 
 
     Color getRayColor(const Ray& inputRay, int depth, const Hittable& world) const {
+        // if the ray keeps being reflected, then return black for that pixel
         if (depth <= 0)
             return Color(0, 0, 0);
 
         HitRecord record;
+        // If the ray hits nothing, return the background color.
+        if (!world.isHit(inputRay, Interval(0.001, RT_INFINITY), record))
+            return backgroundColor;
 
-        if (world.isHit(inputRay, Interval(0.001, RT_INFINITY), record)) {
-            Ray scatteredRay;
-            Color attenuation;
-            if (record.material->doesScatter(inputRay, record, attenuation, scatteredRay))
-                return attenuation * getRayColor(scatteredRay, depth - 1, world);
-            return Color(0, 0, 0);
-        }
+        Ray scattered;
+        Color attenuation;
+        Color emittedColor = record.material->getEmittedColor(record.u, record.v, record.hitPosition);
+        if (!record.material->doesScatter(inputRay, record, attenuation, scattered))
+            return emittedColor;         // only light material returns false for doesScatter()
 
-        Vec3 unitDirection = getUnitVector(inputRay.getDirection());
-        auto lerp = 0.5 * (unitDirection.getY() + 1.0);
-        return (1.0 - lerp) * Color(1.0, 1.0, 1.0) + lerp * Color(0.5, 0.7, 1.0);
+        // handle other materials
+        Color scatteredColor = attenuation * getRayColor(scattered, depth - 1, world);
+
+
+        // so far, the emittedColor is zero
+        return emittedColor + scatteredColor;
     }
 
 
