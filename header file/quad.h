@@ -40,7 +40,7 @@ public:
             return false;
 
         // Now we know that the ray hits the plane
-        // Hence, we need to calculate alpha and beta to check whether they are inside the quad
+        // Hence, we need to calculate alpha and beta to check whether they are inside the Quad
         auto positionIntersect = inputRay.getPosition(timeIntersect);
         auto alpha = performDot(performCross(positionIntersect - q, v), k);
         auto beta = performDot(performCross(u, positionIntersect - q), k);
@@ -79,5 +79,29 @@ private:
     std::shared_ptr<Material> material;
     AABB boundingBox;
 };
+
+
+inline std::shared_ptr<HittableList> getBox(const Point3& a, const Point3& b, std::shared_ptr<Material> material)
+{
+    // Returns the 3D box (six sides) that contains the two opposite vertices a & b.
+    auto sides = std::make_shared<HittableList>();
+
+    // Construct the two opposite vertices with the minimum and maximum coordinates.
+    auto min = Point3(std::fmin(a.getX(), b.getX()), std::fmin(a.getY(), b.getY()), std::fmin(a.getZ(), b.getZ()));
+    auto max = Point3(std::fmax(a.getX(), b.getX()), std::fmax(a.getY(), b.getY()), std::fmax(a.getZ(), b.getZ()));
+
+    auto dx = Vec3(max.getX() - min.getX(), 0, 0);
+    auto dy = Vec3(0, max.getY() - min.getY(), 0);
+    auto dz = Vec3(0, 0, max.getZ() - min.getZ());
+
+    sides->add(std::make_shared<Quad>(Point3(min.getX(), min.getY(), max.getZ()), dx, dy, material)); // front
+    sides->add(std::make_shared<Quad>(Point3(max.getX(), min.getY(), max.getZ()), -dz, dy, material)); // right
+    sides->add(std::make_shared<Quad>(Point3(max.getX(), min.getY(), min.getZ()), -dx, dy, material)); // back
+    sides->add(std::make_shared<Quad>(Point3(min.getX(), min.getY(), min.getZ()), dz, dy, material)); // left
+    sides->add(std::make_shared<Quad>(Point3(min.getX(), max.getY(), max.getZ()), dx, -dz, material)); // top
+    sides->add(std::make_shared<Quad>(Point3(min.getX(), min.getY(), min.getZ()), dx, dz, material)); // bottom
+
+    return sides;
+}
 
 #endif
