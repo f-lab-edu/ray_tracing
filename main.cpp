@@ -233,6 +233,46 @@ void renderSimpleLight() {
     camera.render(world);
 }
 
+void renderCornellBox() {
+    HittableList world;
+
+    auto red = std::make_shared<Lambertian>(Color(.65, .05, .05));
+    auto white = std::make_shared<Lambertian>(Color(.73, .73, .73));
+    auto green = std::make_shared<Lambertian>(Color(.12, .45, .15));
+    auto light = std::make_shared<DiffuseLight>(Color(15, 15, 15));
+
+    world.add(std::make_shared<Quad>(Point3(555, 0, 0), Vec3(0, 555, 0), Vec3(0, 0, 555), green));
+    world.add(std::make_shared<Quad>(Point3(0, 0, 0), Vec3(0, 555, 0), Vec3(0, 0, 555), red));
+    world.add(std::make_shared<Quad>(Point3(343, 554, 332), Vec3(-130, 0, 0), Vec3(0, 0, -105), light));
+    world.add(std::make_shared<Quad>(Point3(0, 0, 0), Vec3(555, 0, 0), Vec3(0, 0, 555), white));
+    world.add(std::make_shared<Quad>(Point3(555, 555, 555), Vec3(-555, 0, 0), Vec3(0, 0, -555), white));
+    world.add(std::make_shared<Quad>(Point3(0, 0, 555), Vec3(555, 0, 0), Vec3(0, 555, 0), white));
+
+
+    world.add(getBox(Point3(130, 0, 65), Point3(295, 165, 230), white));
+    world.add(getBox(Point3(265, 0, 295), Point3(430, 330, 460), white));
+
+
+    Camera camera;
+
+    camera.aspectRatio = 1.0;
+    camera.imageWidth = 600;
+    camera.samplesPerPixel = 100; // 200
+    camera.maxDepth = 10; // 50
+    camera.backgroundColor = Color(0, 0, 0);
+
+
+    camera.verticalFOV = 40;
+    camera.lookFrom = Point3(278, 278, -800);
+    camera.lookAt = Point3(278, 278, 0);
+    camera.upVector = Vec3(0, 1, 0);
+
+    camera.defocusAngle = 0;
+
+    camera.render(world);
+}
+
+
 
 int main() {
     //renderBouncingSpheres();
@@ -240,7 +280,8 @@ int main() {
     //renderEarth();
     //renderPerlinSpheres();
     //renderQuads();
-    renderSimpleLight();
+    //renderSimpleLight();
+    renderCornellBox();
     
     return 0;
 }
