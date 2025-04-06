@@ -92,4 +92,12 @@ private:
 const AABB AABB::empty = AABB(Interval::empty, Interval::empty, Interval::empty);
 const AABB AABB::universe = AABB(Interval::universe, Interval::universe, Interval::universe);
 
+AABB operator+(const AABB& boundingBox, const Vec3& offset) {
+    return AABB(boundingBox.intervalX + offset.getX(), boundingBox.intervalY + offset.getY(), boundingBox.intervalZ + offset.getZ());
+}
+
+AABB operator+(const Vec3& offset, const AABB& boundingBox) {
+    return boundingBox + offset;
+}
+
 #endif
