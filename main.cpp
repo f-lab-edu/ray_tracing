@@ -73,7 +73,8 @@ void renderBouncingSpheres() {
     camera.aspectRatio = 16.0 / 9.0;
     camera.imageWidth = 400;
     camera.samplesPerPixel = 100;
-    camera.maxDepth = 50;
+    camera.maxDepth = 20;
+    camera.backgroundColor = Color(0.7, 0.8, 1.0);
 
     camera.verticalFOV = 20;
     camera.lookFrom = Point3(13, 2, 3);
@@ -101,6 +102,8 @@ void renderCheckeredSpheres() {
     camera.imageWidth = 400;
     camera.samplesPerPixel= 100;
     camera.maxDepth = 50;
+    camera.backgroundColor = Color(0.7, 0.8, 1.0);
+
 
     camera.verticalFOV = 20;
     camera.lookFrom = Point3(13, 2, 3);
@@ -123,6 +126,8 @@ void renderEarth() {
     camera.imageWidth = 400;
     camera.samplesPerPixel = 100;
     camera.maxDepth = 50;
+    camera.backgroundColor = Color(0.7, 0.8, 1.0);
+
 
     camera.verticalFOV = 20;
     camera.lookFrom = Point3(0, 0, 12);
@@ -147,6 +152,8 @@ void renderPerlinSpheres() {
     camera.imageWidth = 400;
     camera.samplesPerPixel = 100;
     camera.maxDepth = 50;
+    camera.backgroundColor = Color(0.7, 0.8, 1.0);
+
 
     camera.verticalFOV = 20;
     camera.lookFrom = Point3(13, 2, 3);
@@ -181,10 +188,44 @@ void renderQuads() {
     camera.imageWidth = 400;
     camera.samplesPerPixel = 100;
     camera.maxDepth = 50;
+    camera.backgroundColor = Color(0.7, 0.8, 1.0);
+
 
     camera.verticalFOV = 80;
     camera.lookFrom = Point3(0, 0, 9);
     camera.lookAt = Point3(0, 0, 0);
+    camera.upVector = Vec3(0, 1, 0);
+
+    camera.defocusAngle = 0;
+
+    camera.render(world);
+}
+
+void renderSimpleLight() {
+    HittableList world;
+
+    //auto perlinTexture = std::make_shared<NoiseTexture>(4);
+    auto constantTextureGround = std::make_shared<ConstantTexture>(Color(0.8, 0.8, 0.8));
+    auto constantTextureSphere = std::make_shared<ConstantTexture>(Color(0.3, 0.4, 0.5));
+    world.add(std::make_shared<Sphere>(Point3(0, -1000, 0), 1000, std::make_shared<Lambertian>(constantTextureGround)));
+    world.add(std::make_shared<Sphere>(Point3(0, 2, 0), 2, std::make_shared<Lambertian>(constantTextureSphere)));
+
+    auto lightTexture = std::make_shared<DiffuseLight>(Color(4, 4, 4));
+    world.add(std::make_shared<Sphere>(Point3(0, 2000, 0), 300, lightTexture));         // sun
+    world.add(std::make_shared<Quad>(Point3(3, 1, -5), Vec3(2, 0, 0), Vec3(0, 0, 2), lightTexture));
+
+    Camera camera;
+
+    camera.aspectRatio = 16.0/9.0;
+    camera.imageWidth = 400;
+    camera.samplesPerPixel = 100;
+    camera.maxDepth = 50;
+    camera.backgroundColor = Color(0,0,0);
+
+
+    camera.verticalFOV = 20;
+    camera.lookFrom = Point3(26, 3, 6);
+    camera.lookAt = Point3(0, 2, 0);
     camera.upVector = Vec3(0, 1, 0);
 
     camera.defocusAngle = 0;
@@ -198,7 +239,8 @@ int main() {
     //renderCheckeredSpheres();
     //renderEarth();
     //renderPerlinSpheres();
-    renderQuads();
+    //renderQuads();
+    renderSimpleLight();
     
     return 0;
 }
