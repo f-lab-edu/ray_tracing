@@ -249,18 +249,28 @@ void renderCornellBox() {
     world.add(std::make_shared<Quad>(Point3(0, 0, 555), Vec3(555, 0, 0), Vec3(0, 555, 0), white));
 
 
-    world.add(getBox(Point3(130, 0, 65), Point3(295, 165, 230), white));
-    world.add(getBox(Point3(265, 0, 295), Point3(430, 330, 460), white));
+    // original boxes
+    //world.add(getBox(Point3(130, 0, 65), Point3(295, 165, 230), white));
+    //world.add(getBox(Point3(265, 0, 295), Point3(430, 330, 460), white));
+
+    // adjusted boxes
+    std::shared_ptr<Hittable> box1 = getBox(Point3(0, 0, 0), Point3(165, 330, 165), white);
+    box1 = std::make_shared<RotateY>(box1, 15);
+    box1 = std::make_shared<Translate>(box1, Vec3(265, 0, 295));
+    world.add(box1);
+    std::shared_ptr<Hittable> box2 = getBox(Point3(0, 0, 0), Point3(165, 165, 165), white);
+    box2 = std::make_shared<RotateY>(box2, -18);
+    box2 = std::make_shared<Translate>(box2, Vec3(130, 0, 65));
+    world.add(box2);
 
 
     Camera camera;
 
     camera.aspectRatio = 1.0;
     camera.imageWidth = 600;
-    camera.samplesPerPixel = 100; // 200
-    camera.maxDepth = 10; // 50
+    camera.samplesPerPixel = 200;
+    camera.maxDepth = 50;
     camera.backgroundColor = Color(0, 0, 0);
-
 
     camera.verticalFOV = 40;
     camera.lookFrom = Point3(278, 278, -800);
