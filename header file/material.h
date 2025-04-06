@@ -11,6 +11,9 @@ public:
     virtual bool doesScatter(const Ray &inputRay, const HitRecord &record, Color &attenuation, Ray &scatteredRay) const {
         return false;
     }
+    virtual Color getEmittedColor(double u, double v, const Point3& hitPosition) const {
+        return Color(0, 0, 0);
+    }
 };
 
 class Lambertian : public Material {
@@ -92,6 +95,20 @@ private:
         r0 = r0 * r0;
         return r0 + (1 - r0) * std::pow((1 - cosine), 5);
     }
+};
+
+class DiffuseLight : public Material {
+public:
+    DiffuseLight(std::shared_ptr<Texture> inputTexture) : texture(inputTexture) {}
+    DiffuseLight(const Color& emit) : texture(std::make_shared<ConstantTexture>(emit)) {}
+
+    Color getEmittedColor(double u, double v, const Point3& hitPosition) const override {
+        // returns constant color by default
+        return texture->getColor(u, v, hitPosition);
+    }
+
+private:
+    std::shared_ptr<Texture> texture;
 };
 
 #endif
