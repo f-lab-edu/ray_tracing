@@ -7,12 +7,12 @@ class Interval {
 public:
     double min, max;
 
-    Interval() : min(+RT_INFINITY), max(-RT_INFINITY) {} // Default interval is empty
+    Interval() : min(+RT_INFINITY), max(-RT_INFINITY) {} // Default Interval is empty
 
     Interval(double min, double max) : min(min), max(max) {}
 
     Interval(Interval lhs, Interval rhs) {
-        // Create the interval tightly enclosing the two input intervals.
+        // Create the Interval tightly enclosing the two input intervals.
         min = lhs.min <= rhs.min ? lhs.min : rhs.min;
         max = lhs.max >= rhs.max ? lhs.max : rhs.max;
     }
@@ -45,5 +45,14 @@ public:
 
 const Interval Interval::empty = Interval(+RT_INFINITY, -RT_INFINITY);
 const Interval Interval::universe = Interval(-RT_INFINITY, +RT_INFINITY);
+
+
+Interval operator+(const Interval& inputInterval, double displacement) {
+    return Interval(inputInterval.min + displacement, inputInterval.max + displacement);
+}
+
+Interval operator+(double displacement, const Interval& inputInterval) {
+    return inputInterval + displacement;
+}
 
 #endif
