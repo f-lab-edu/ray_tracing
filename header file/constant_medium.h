@@ -16,25 +16,25 @@ public:
     {}
 
     bool isHit(const Ray& inputRay, Interval timeIntervalToCheck, HitRecord& record) const override {
-        HitRecord rec1, rec2;
+        HitRecord firstIntersectionRecord, secondIntersectionRecord;
 
-        if (!boundary->isHit(inputRay, Interval::universe, rec1))
+        if (!boundary->isHit(inputRay, Interval::universe, firstIntersectionRecord))
             return false;
 
-        if (!boundary->isHit(inputRay, Interval(rec1.hitTime + 0.0001, RT_INFINITY), rec2))
+        if (!boundary->isHit(inputRay, Interval(firstIntersectionRecord.hitTime + 0.0001, RT_INFINITY), secondIntersectionRecord))
             return false;
 
-        if (rec1.hitTime < timeIntervalToCheck.min) rec1.hitTime = timeIntervalToCheck.min;
-        if (rec2.hitTime > timeIntervalToCheck.max) rec2.hitTime = timeIntervalToCheck.max;
+        if (firstIntersectionRecord.hitTime < timeIntervalToCheck.min) firstIntersectionRecord.hitTime = timeIntervalToCheck.min;
+        if (secondIntersectionRecord.hitTime > timeIntervalToCheck.max) secondIntersectionRecord.hitTime = timeIntervalToCheck.max;
 
-        if (rec1.hitTime >= rec2.hitTime)
+        if (firstIntersectionRecord.hitTime >= secondIntersectionRecord.hitTime)
             return false;
 
-        if (rec1.hitTime < 0)
-            rec1.hitTime = 0;
+        if (firstIntersectionRecord.hitTime < 0)
+            firstIntersectionRecord.hitTime = 0;
 
         auto rayLengthTimeOne = inputRay.getDirection().getLength();
-        auto distanceIntersections = (rec2.hitTime - rec1.hitTime) * rayLengthTimeOne;          // distance between two intersection points
+        auto distanceIntersections = (secondIntersectionRecord.hitTime - firstIntersectionRecord.hitTime) * rayLengthTimeOne;          // distance between two intersection points
         auto distanceScattering = negativeInverseDensity * std::log(getRandomDouble());         // distance between first intersection and the point 
                                                                                                 //  where the ray starts to be scattered
 
@@ -42,7 +42,7 @@ public:
             return false;
 
         // update hit information to the scattering point
-        record.hitTime = rec1.hitTime + distanceScattering / rayLengthTimeOne;
+        record.hitTime = firstIntersectionRecord.hitTime + distanceScattering / rayLengthTimeOne;
         record.hitPosition = inputRay.getPosition(record.hitTime);
 
         record.normalizedVector = Vec3(1, 0, 0);    // arbitrary
