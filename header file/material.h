@@ -114,4 +114,19 @@ private:
     std::shared_ptr<Texture> texture;
 };
 
+class Isotropic : public Material {
+public:
+    Isotropic(const Color& albedo) : texture(std::make_shared<ConstantTexture>(albedo)) {}
+    Isotropic(std::shared_ptr<Texture> inputTexture) : texture(inputTexture) {}
+
+    bool doesScatter(const Ray& inputRay, const HitRecord& record, Color& attenuation, Ray& scatteredRay) const override {
+        scatteredRay = Ray(record.hitPosition, getRandomUnitVector(), inputRay.getTime());
+        attenuation = texture->getColor(record.u, record.v, record.hitPosition);
+        return true;
+    }
+
+private:
+    std::shared_ptr<Texture> texture;
+};
+
 #endif
