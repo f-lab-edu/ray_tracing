@@ -19,7 +19,7 @@ inline double convertDegreesToRadians(double degrees) {
 
 
 inline double getRandomDouble(double min, double max) {
-    static std::uniform_real_distribution<double> distribution(min, max);
+    std::uniform_real_distribution<double> distribution(min, max);
     static std::mt19937 generator;
     return distribution(generator);
 }
