@@ -31,10 +31,21 @@ public:
             std::clog << "\rScanlines remaining: " << (imageHeight - currentHeight) << ' ' << std::flush;
             for (int currentWidth = 0; currentWidth < imageWidth; ++currentWidth) {
                 Color pixelColor(0, 0, 0);
+
+                // jittering applied
+                for (int currentSampleRow = 0; currentSampleRow < sqrtSamplesPerPixels; ++currentSampleRow) {
+                    for (int currentSampleCol = 0; currentSampleCol < sqrtSamplesPerPixels; ++currentSampleCol) {
+                        Ray currentRay = getRayToSample(currentWidth, currentHeight, currentSampleRow, currentSampleCol);
+                        pixelColor += getRayColor(currentRay, maxDepth, world);
+                    }
+                }
+                /*
+                * original
                 for (int currentSample = 0; currentSample < samplesPerPixel; ++currentSample) {
                     Ray currentRay = getRayToSample(currentWidth, currentHeight);
                     pixelColor += getRayColor(currentRay, maxDepth, world);
                 }
+                */
                 writeColor(std::cout, pixelSamplesScale * pixelColor);
             }
         }
@@ -44,9 +55,10 @@ public:
 
 private:
     void initialize() {
-        imageHeight = int(imageWidth / aspectRatio);
+        imageHeight = static_cast<int>(imageWidth / aspectRatio);
         imageHeight = (imageHeight < 1) ? 1 : imageHeight;
 
+        sqrtSamplesPerPixels = static_cast<int>(std::sqrt(samplesPerPixel));
         pixelSamplesScale = 1.0 / samplesPerPixel;
 
         center = lookFrom;
@@ -83,11 +95,10 @@ private:
         defocusVerticalRadius = axisY * defocusRadius;
     }
 
-    Ray getRayToSample(int currentWidth, int currentHeight) const {
+    Ray getRayToSample(int currentWidth, int currentHeight, int currentSampleRow, int currentSampleCol) const {
         // Construct a camera ray originating from the origin and directed at randomly sampled
         // point around the pixel location currentWidth, currentHeight.
-
-        auto offset = getSampleSquare();
+        auto offset = getSampleSquareStratified(currentSampleRow, currentSampleCol);
         auto pixelSample = pixelCenterTopLeft
             + ((currentWidth + offset.getX()) * pixelDeltaWidth)
             + ((currentHeight + offset.getY()) * pixelDeltaHeight);
@@ -108,6 +119,14 @@ private:
     Vec3 getSampleSquare() const {
         // Returns the vector to a random point in the [-.5,-.5]-[+.5,+.5] unit square.
         return Vec3(getRandomDouble(0, 1) - 0.5, getRandomDouble(0, 1) - 0.5, 0);
+    }
+    Vec3 getSampleSquareStratified(int currentSampleRow, int currentSampleCol) const {
+        // Returns the vector to a random point in the square sub-pixel specified by grid
+        // indices currentSampleRow and currentSampleCol, for an idealized unit square pixel [-.5,-.5] to [+.5,+.5].
+        auto x = ((currentSampleCol + getRandomDouble()) / sqrtSamplesPerPixels) - 0.5;
+        auto y = ((currentSampleRow + getRandomDouble()) / sqrtSamplesPerPixels) - 0.5;
+
+        return Vec3(x, y, 0);
     }
 
 
@@ -136,16 +155,18 @@ private:
     }
 
 
-    int    imageHeight;   // Rendered image height
-    double pixelSamplesScale;        // Color scale factor for a sum of pixel samples
-    Point3 center;         // Camera center
-    Point3 pixelCenterTopLeft;    // Location of pixel 0, 0
-    Vec3   pixelDeltaWidth;  // Offset to pixel to the right
-    Vec3   pixelDeltaHeight;  // Offset to pixel below
-    Vec3   axisX, axisY, axisZ; // camera frame basis vectors (u,v,w)
+    int    imageHeight;                     // Rendered image height
+    double pixelSamplesScale;               // Color scale factor for a sum of pixel samples
+    int    sqrtSamplesPerPixels;            // Square root of number of samples per pixel
 
-    Vec3   defocusHorizontalRadius;       // Defocus disk horizontal radius
-    Vec3   defocusVerticalRadius;       // Defocus disk vertical radius
+    Point3 center;                          // Camera center
+    Point3 pixelCenterTopLeft;              // Location of pixel 0, 0
+    Vec3   pixelDeltaWidth;                 // Offset to pixel to the right
+    Vec3   pixelDeltaHeight;                // Offset to pixel below
+    Vec3   axisX, axisY, axisZ;             // camera frame basis vectors (u,v,w)
+
+    Vec3   defocusHorizontalRadius;         // Defocus disk horizontal radius
+    Vec3   defocusVerticalRadius;           // Defocus disk vertical radius
 };
 
 #endif
